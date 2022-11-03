@@ -14,6 +14,10 @@ public:
     process() :
         _in(), _out(), _pid(-1), _wait_on_kill(true), _alive(false) {  }
 
+    explicit process(std::initializer_list<std::string> args) :
+        _in(), _out(), _pid(-1), _wait_on_kill(true), _alive(false)
+    { spawn(args); }
+
     template<typename ...Args>
     explicit process(Args ...args) :
         _in(), _out(), _pid(-1), _wait_on_kill(true), _alive(false)
@@ -85,10 +89,11 @@ public:
     ofdstream& output() { return _out; }
     ofdstream const& output() const { return _out; }
 
+    // TODO: Maybe return 'process&' instead of ifdstream/ofdstream
     template<typename T>
-    process& operator>>(T&& __rhs) { _in >> __rhs; return *this; }
+    std::istream& operator>>(T&& __rhs) { return _in >> __rhs; }
     template<typename T>
-    process& operator<<(T&& __rhs) { _out << __rhs; return *this; }
+    std::ostream& operator<<(T&& __rhs) { return _out << __rhs; }
 
     operator ifdstream&() { return _in; }
     operator ifdstream const&() const { return _in; }
@@ -96,13 +101,13 @@ public:
     operator ofdstream const&() const { return _out; }
 
     // A hack to make functions like 'std::endl' work.
-    process& operator<<(std::ostream& (*f)(std::ostream&)) {
+    std::ostream& operator<<(std::ostream& (*f)(std::ostream&)) {
         f(_out);
-        return *this;
+        return _out;
     }
-    process& operator>>(std::istream& (*f)(std::istream&)) {
+    std::istream& operator>>(std::istream& (*f)(std::istream&)) {
         f(_in);
-        return *this;
+        return _in;
     }
 
     // Flags setters
