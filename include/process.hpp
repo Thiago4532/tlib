@@ -29,6 +29,7 @@ public:
         _in = std::move(__rhs._in);
         _out = std::move(__rhs._out);
         _pid = __rhs._pid;
+        _alive = __rhs._alive;
     }
 
     ~process() { this->kill(); }
